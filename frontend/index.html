@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>天气缓存演示</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header>
+    <div>
+      <p class="eyebrow">Spring Cache · Redis · PostgreSQL</p>
+      <h1>天气缓存演示</h1>
+    </div>
+    <p class="lede">查询先看 Redis。没有条目就是未命中，请求会落到 PostgreSQL，并把结果写回 <code>weatherCache</code>。再查同一城市则直接命中缓存。</p>
+  </header>
+
+  <main>
+    <section class="panel">
+      <h2>按城市查询</h2>
+      <form id="query-form">
+        <label>
+          城市
+          <input id="city" name="city" value="Bangalore" required>
+        </label>
+        <button type="submit">查询</button>
+        <button type="button" id="query-again" class="secondary">再查一次</button>
+      </form>
+      <div id="query-result" class="result empty">尚未查询</div>
+    </section>
+
+    <section class="panel">
+      <h2>写入与清除</h2>
+      <form id="write-form">
+        <label>城市<input id="write-city" value="Bangalore" required></label>
+        <label>温度<input id="temperature" type="number" step="0.1" value="29.0" required></label>
+        <label>湿度<input id="humidity" type="number" value="60" required></label>
+        <label>天气<input id="condition" value="Sunny" required></label>
+        <div class="actions">
+          <button type="button" id="add-btn">新增</button>
+          <button type="button" id="update-btn" class="secondary">更新</button>
+          <button type="button" id="delete-btn" class="danger">删除</button>
+        </div>
+      </form>
+      <div class="actions">
+        <button type="button" id="list-btn" class="secondary">查询全部</button>
+        <button type="button" id="evict-btn" class="danger">清空 weatherCache</button>
+        <button type="button" id="evict-all-btn" class="danger">清空 weatherCacheAll</button>
+      </div>
+    </section>
+
+    <section class="panel wide">
+      <div class="panel-head">
+        <h2>Redis 缓存</h2>
+        <button type="button" id="refresh-cache" class="secondary">刷新</button>
+      </div>
+      <div class="cache-grid">
+        <div>
+          <h3>weatherCache</h3>
+          <pre id="cache-city">加载中…</pre>
+        </div>
+        <div>
+          <h3>weatherCacheAll</h3>
+          <pre id="cache-all">加载中…</pre>
+        </div>
+      </div>
+    </section>
+
+    <section class="panel wide">
+      <h2>请求记录</h2>
+      <ol id="log"></ol>
+    </section>
+  </main>
+  <script src="app.js"></script>
+</body>
+</html>

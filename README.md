@@ -156,7 +156,21 @@ public void deleteWeather(String city) {
 ---
 
 ## 🎯 Running the Application
-1️⃣ **Start Redis Server** (`redis-server` command).
+
+### Docker Compose
+PostgreSQL, Redis, the Spring Boot API, and a frontend demo are defined in `docker-compose.yml`.
+
+```sh
+docker compose up --build
+```
+
+- Demo UI: [http://localhost:8080](http://localhost:8080)
+- API / Swagger: [http://localhost:8777/swagger-ui.html](http://localhost:8777/swagger-ui.html)
+
+The UI calls the API through the frontend nginx proxy (`/api` → backend). Query a city once to see a cache miss (`X-Cache: MISS`, row loaded from PostgreSQL and stored in `weatherCache`). Query it again to see a hit. Update, delete, and evict refresh the Redis panel beside the form.
+
+### Local processes
+1️⃣ **Start Redis Server** (`redis-server` command) and PostgreSQL.
 2️⃣ **Run the Spring Boot application** (`mvn spring-boot:run`).
 3️⃣ **Access Swagger UI** at [http://localhost:8777/swagger-ui.html](http://localhost:8777/swagger-ui.html).
 
