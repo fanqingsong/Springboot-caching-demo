@@ -167,6 +167,30 @@ docker compose up --build
 - Demo UI: [http://localhost:8080](http://localhost:8080)
 - API / Swagger: [http://localhost:8777/swagger-ui.html](http://localhost:8777/swagger-ui.html)
 
+### Configuration injected by Compose
+
+`src/main/resources/application.properties` is the preset configuration packaged in the jar. Spring Boot loads it from the classpath at startup. Environment variables on the `backend` service have higher precedence, so a matching key in `docker-compose.yml` replaces the file value. Keys with no environment variable keep the value from the file.
+
+Turn a property name into an environment variable by uppercasing it and replacing `.` and `-` with `_`.
+
+| `application.properties` | Environment variable | Value set in Compose |
+|---|---|---|
+| `spring.datasource.url` | `SPRING_DATASOURCE_URL` | `jdbc:postgresql://postgres:5432/WeatherDB` |
+| `spring.datasource.username` | `SPRING_DATASOURCE_USERNAME` | `postgres` |
+| `spring.datasource.password` | `SPRING_DATASOURCE_PASSWORD` | same as the properties file |
+| `spring.data.redis.host` | `SPRING_DATA_REDIS_HOST` | `redis` |
+| `spring.data.redis.port` | `SPRING_DATA_REDIS_PORT` | `6379` |
+
+Inside the Compose network the database and Redis hostnames are the service names `postgres` and `redis`. The `localhost` values in `application.properties` apply only when the app runs on the host.
+
+To inject another property, add it under `backend.environment` with the same naming rule. For example, `spring.cache.redis.time-to-live=600000` becomes:
+
+```yaml
+SPRING_CACHE_REDIS_TIME_TO_LIVE: "600000"
+```
+
+Recreate the container so the new variable is applied: `docker compose up -d --build backend`.
+
 The UI calls the API through the frontend nginx proxy (`/api` → backend). Query a city once to see a cache miss (`X-Cache: MISS`, row loaded from PostgreSQL and stored in `weatherCache`). Query it again to see a hit. Update, delete, and evict refresh the Redis panel beside the form.
 
 ### Local processes
@@ -225,6 +249,9 @@ $ redis-cli
 ---
 
 ## 🎯 Application Properties
+
+Preset values below live in `src/main/resources/application.properties`. Docker Compose overrides datasource and Redis host settings through environment variables; see [Configuration injected by Compose](#configuration-injected-by-compose).
+
 ```properties
 spring.application.name=Weather-App
 server.port=8777
