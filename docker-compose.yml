@@ -17,6 +17,9 @@ services:
 
   redis:
     image: swr.cn-north-4.myhuaweicloud.com/ddn-k8s/docker.io/library/redis:7-alpine
+    # Memory ceiling. allkeys-lru evicts the least recently used key once this is reached.
+    # Entry lifetime is separate: spring.cache.redis.time-to-live on the backend.
+    command: ["redis-server", "--maxmemory", "64mb", "--maxmemory-policy", "allkeys-lru"]
     ports:
       - "6379:6379"
     healthcheck:
@@ -24,6 +27,20 @@ services:
       interval: 5s
       timeout: 3s
       retries: 12
+
+  redisinsight:
+    image: swr.cn-north-4.myhuaweicloud.com/ddn-k8s/docker.io/redis/redisinsight:latest
+    ports:
+      - "5540:5540"
+    environment:
+      RI_REDIS_HOST: redis
+      RI_REDIS_PORT: "6379"
+      RI_REDIS_ALIAS: weather-cache
+    volumes:
+      - redisinsight:/data
+    depends_on:
+      redis:
+        condition: service_healthy
 
   backend:
     build: .
@@ -50,3 +67,4 @@ services:
 
 volumes:
   pgdata:
+  redisinsight:
